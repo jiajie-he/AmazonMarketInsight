@@ -1,14 +1,12 @@
-package blog.dal;
+package AmazonMarketInsight.dal;
 
-import blog.model.*;
+import AmazonMarketInsight.model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -32,17 +30,17 @@ public class AdministratorsDao extends PersonsDao {
 	
 	public Administrators create(Administrators administrator) throws SQLException {
 		// Insert into the superclass table first.
-		create(new Persons(administrator.getUserName(), administrator.getFirstName(),
-			administrator.getLastName()));
+		create(new Persons(administrator.getUserName()));
 
-		String insertAdministrator = "INSERT INTO Administrators(UserName,LastLogin) VALUES(?,?);";
+		String insertAdministrator = "INSERT INTO Administrators(UserName,CanEditPosts,CanDeletePosts) VALUES(?,?,?);";
 		Connection connection = null;
 		PreparedStatement insertStmt = null;
 		try {
 			connection = connectionManager.getConnection();
 			insertStmt = connection.prepareStatement(insertAdministrator);
 			insertStmt.setString(1, administrator.getUserName());
-			insertStmt.setTimestamp(2, new Timestamp(administrator.getLastLogin().getTime()));
+			insertStmt.setBoolean(2, administrator.getCanEditPosts());
+			insertStmt.setBoolean(3, administrator.getCanDeletePosts());
 			insertStmt.executeUpdate();
 			return administrator;
 		} catch (SQLException e) {
@@ -105,7 +103,7 @@ public class AdministratorsDao extends PersonsDao {
 	public Administrators getAdministratorFromUserName(String userName) throws SQLException {
 		// To build an Administrator object, we need the Persons record, too.
 		String selectAdministrator =
-			"SELECT Administrators.UserName AS UserName, FirstName, LastName, LastLogin " +
+			"SELECT Administrators.UserName AS UserName, Password, FirstName, LastName, Email, PhoneNumber,CanEditPosts,CanDeletePosts   " +
 			"FROM Administrators INNER JOIN Persons " +
 			"  ON Administrators.UserName = Persons.UserName " +
 			"WHERE Administrators.UserName=?;";
@@ -119,10 +117,14 @@ public class AdministratorsDao extends PersonsDao {
 			results = selectStmt.executeQuery();
 			if(results.next()) {
 				String resultUserName = results.getString("UserName");
+				String password = results.getString("Password");
 				String firstName = results.getString("FirstName");
 				String lastName = results.getString("LastName");
-				Date lastLogin = new Date(results.getTimestamp("LastLogin").getTime());
-				Administrators administrator = new Administrators(resultUserName, firstName, lastName, lastLogin);
+				String email = results.getString("Email");
+				String phoneNumber = results.getString("PhoneNumber");
+				Boolean canEditPosts = results.getBoolean("CanEditPosts");
+				Boolean canDeletePosts = results.getBoolean("CanDeletePosts");
+				Administrators administrator = new Administrators(resultUserName, password, firstName, lastName, email, phoneNumber,canEditPosts,canDeletePosts);
 				return administrator;
 			}
 		} catch (SQLException e) {
@@ -146,7 +148,7 @@ public class AdministratorsDao extends PersonsDao {
 			throws SQLException {
 		List<Administrators> administrators = new ArrayList<Administrators>();
 		String selectAdministrators =
-			"SELECT Administrators.UserName AS UserName, FirstName, LastName, LastLogin " +
+			"SELECT Administrators.UserName AS UserName, Password, FirstName, LastName, Email, PhoneNumber,CanEditPosts,CanDeletePosts   " +
 			"FROM Administrators INNER JOIN Persons " +
 			"  ON Administrators.UserName = Persons.UserName " +
 			"WHERE Persons.FirstName=?;";
@@ -160,10 +162,14 @@ public class AdministratorsDao extends PersonsDao {
 			results = selectStmt.executeQuery();
 			while(results.next()) {
 				String userName = results.getString("UserName");
-				String resultFirstName = results.getString("FirstName");
+				String password = results.getString("Password");
+				String resultfirstName = results.getString("FirstName");
 				String lastName = results.getString("LastName");
-				Date lastLogin = new Date(results.getTimestamp("LastLogin").getTime());
-				Administrators administrator = new Administrators(userName, resultFirstName, lastName, lastLogin);
+				String email = results.getString("Email");
+				String phoneNumber = results.getString("PhoneNumber");
+				Boolean canEditPosts = results.getBoolean("CanEditPosts");
+				Boolean canDeletePosts = results.getBoolean("CanDeletePosts");
+				Administrators administrator = new Administrators(userName, password, resultfirstName, lastName, email, phoneNumber,canEditPosts,canDeletePosts);
 				administrators.add(administrator);
 			}
 		} catch (SQLException e) {
