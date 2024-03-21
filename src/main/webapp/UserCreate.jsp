@@ -11,7 +11,7 @@
 <title>Create a User</title>
 </head>
 <body>
-	<h1>Create BlogUser</h1>
+	<h1>Create User</h1>
 	<form action="usercreate" method="post">
 		<p>
 			<label for="username">UserName</label>
@@ -28,6 +28,10 @@
 		<p>
 			<label for="dob">DoB (yyyy-mm-dd)</label>
 			<input id="dob" name="dob" value="">
+		</p>
+		<p>
+			<label for="subscribed">Subscribed (True or False)</label>
+			<input id="subscribed" name="subscribed" value="">
 		</p>
 		<p>
 			<input type="submit">

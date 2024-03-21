@@ -11,15 +11,15 @@
 <title>Update a User</title>
 </head>
 <body>
-	<h1>Update BlogUser</h1>
+	<h1>Update User</h1>
 	<form action="userupdate" method="post">
 		<p>
 			<label for="username">UserName</label>
 			<input id="username" name="username" value="${fn:escapeXml(param.username)}">
 		</p>
 		<p>
-			<label for="lastname">New LastName</label>
-			<input id="lastname" name="lastname" value="">
+			<label for="subscribed">New Subscribe Status</label>
+			<input id="subscribed" name="subscribed" value="">
 		</p>
 		<p>
 			<input type="submit">
