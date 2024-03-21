@@ -1,7 +1,7 @@
-package blog.servlet;
+package AmazonMarketInsight.servlet;
 
-import blog.dal.*;
-import blog.model.*;
+import AmazonMarketInsight.dal.*;
+import AmazonMarketInsight.model.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -22,11 +22,11 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/usercreate")
 public class UserCreate extends HttpServlet {
 	
-	protected BlogUsersDao blogUsersDao;
+	protected UsersDao usersDao;
 	
 	@Override
 	public void init() throws ServletException {
-		blogUsersDao = BlogUsersDao.getInstance();
+		usersDao = UsersDao.getInstance();
 	}
 	
 	@Override
@@ -51,13 +51,14 @@ public class UserCreate extends HttpServlet {
         if (userName == null || userName.trim().isEmpty()) {
             messages.put("success", "Invalid UserName");
         } else {
-        	// Create the BlogUser.
+        	// Create the User.
         	String firstName = req.getParameter("firstname");
         	String lastName = req.getParameter("lastname");
         	// dob must be in the format yyyy-mm-dd.
         	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         	String stringDob = req.getParameter("dob");
         	Date dob = new Date();
+			Bool subscribed = req.getParameter("subscribed");
         	try {
         		dob = dateFormat.parse(stringDob);
         	} catch (ParseException e) {
@@ -66,8 +67,8 @@ public class UserCreate extends HttpServlet {
         	}
 	        try {
 	        	// Exercise: parse the input for StatusLevel.
-	        	BlogUsers blogUser = new BlogUsers(userName, firstName, lastName, dob, BlogUsers.StatusLevel.novice);
-	        	blogUser = blogUsersDao.create(blogUser);
+	        	Users user = new Users(userName, firstName, lastName, dob, subscribed);
+	        	user = usersDao.create(user);
 	        	messages.put("success", "Successfully created " + userName);
 	        } catch (SQLException e) {
 				e.printStackTrace();
