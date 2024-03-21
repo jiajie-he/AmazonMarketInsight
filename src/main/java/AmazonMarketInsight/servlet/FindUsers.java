@@ -1,7 +1,7 @@
-package blog.servlet;
+package AmazonMarketInsight.servlet;
 
-import blog.dal.*;
-import blog.model.*;
+import AmazonMarketInsight.dal.*;
+import AmazonMarketInsight.model.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -36,11 +36,11 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/findusers")
 public class FindUsers extends HttpServlet {
 	
-	protected BlogUsersDao blogUsersDao;
+	protected UsersDao usersDao;
 	
 	@Override
 	public void init() throws ServletException {
-		blogUsersDao = BlogUsersDao.getInstance();
+		usersDao = UsersDao.getInstance();
 	}
 	
 	@Override
@@ -50,7 +50,7 @@ public class FindUsers extends HttpServlet {
         Map<String, String> messages = new HashMap<String, String>();
         req.setAttribute("messages", messages);
 
-        List<BlogUsers> blogUsers = new ArrayList<BlogUsers>();
+        List<Users> users = new ArrayList<Users>();
         
         // Retrieve and validate name.
         // firstname is retrieved from the URL query string.
@@ -58,9 +58,9 @@ public class FindUsers extends HttpServlet {
         if (firstName == null || firstName.trim().isEmpty()) {
             messages.put("success", "Please enter a valid name.");
         } else {
-        	// Retrieve BlogUsers, and store as a message.
+        	// Retrieve Users, and store as a message.
         	try {
-            	blogUsers = blogUsersDao.getBlogUsersFromFirstName(firstName);
+            	users = usersDao.getUsersFromFirstName(firstName);
             } catch (SQLException e) {
     			e.printStackTrace();
     			throw new IOException(e);
@@ -70,7 +70,7 @@ public class FindUsers extends HttpServlet {
         	// in the input box when rendering FindUsers.jsp.
         	messages.put("previousFirstName", firstName);
         }
-        req.setAttribute("blogUsers", blogUsers);
+        req.setAttribute("users", users);
         
         req.getRequestDispatcher("/FindUsers.jsp").forward(req, resp);
 	}
@@ -82,7 +82,7 @@ public class FindUsers extends HttpServlet {
         Map<String, String> messages = new HashMap<String, String>();
         req.setAttribute("messages", messages);
 
-        List<BlogUsers> blogUsers = new ArrayList<BlogUsers>();
+        List<Users> users = new ArrayList<Users>();
         
         // Retrieve and validate name.
         // firstname is retrieved from the form POST submission. By default, it
@@ -91,16 +91,16 @@ public class FindUsers extends HttpServlet {
         if (firstName == null || firstName.trim().isEmpty()) {
             messages.put("success", "Please enter a valid name.");
         } else {
-        	// Retrieve BlogUsers, and store as a message.
+        	// Retrieve Users, and store as a message.
         	try {
-            	blogUsers = blogUsersDao.getBlogUsersFromFirstName(firstName);
+            	users = usersDao.getUsersFromFirstName(firstName);
             } catch (SQLException e) {
     			e.printStackTrace();
     			throw new IOException(e);
             }
         	messages.put("success", "Displaying results for " + firstName);
         }
-        req.setAttribute("blogUsers", blogUsers);
+        req.setAttribute("users", users);
         
         req.getRequestDispatcher("/FindUsers.jsp").forward(req, resp);
     }
