@@ -1,12 +1,13 @@
 package AmazonMarketInsight.model;
 
-import java.util.Timestamp;
+import java.sql.Timestamp;
+import java.util.Locale.Category;
 
 public class UserGroups {
     private int groupId;
     private String groupName;
     private String role;
-    private Timestamp joinDate;
+    private java.sql.Timestamp joinDate;
     private String userName;
     private Category category;
 

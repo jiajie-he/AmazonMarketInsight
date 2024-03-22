@@ -1,6 +1,5 @@
-package amazon.model;
+package AmazonMarketInsight.model;
 import java.sql.Date;
-import amazon.model.*;
 
 public class PostComments {
     private int postCommentId; // This is a surrogate key

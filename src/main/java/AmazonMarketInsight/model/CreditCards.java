@@ -1,5 +1,6 @@
 package AmazonMarketInsight.model;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -13,7 +14,7 @@ public class CreditCards{
 	
 	public CreditCards(BigInteger cardNumber, Date expiration, Users userName) {
 		this.CardNumber = cardNumber;
-		this.Expiration = expiratoin;
+		this.Expiration = expiration;
 		this.UserName = userName;
 	}
 	
@@ -23,11 +24,11 @@ public class CreditCards{
 
 	/** Getters and setters. */
 	
-	public Date getCardNumber() {
+	public BigInteger getCardNumber() {
 		return CardNumber;
 	}
 
-	public void setCardNumber(Date cardNumber) {
+	public void setCardNumber(BigInteger cardNumber) {
 		this.CardNumber = cardNumber;
 	}
 	
@@ -39,11 +40,11 @@ public class CreditCards{
 		this.Expiration = expiration;
 	}
 	
-	public Date getUserName() {
+	public Users getUserName() {
 		return UserName;
 	}
 
-	public void setUserName(Date userName) {
+	public void setUserName(Users userName) {
 		this.UserName = userName;
 	}
 }
