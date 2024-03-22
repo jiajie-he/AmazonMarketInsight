@@ -1,6 +1,6 @@
-package AmazonMarketInsight.model;gUser
+package AmazonMarketInsight.model;
 
-import java.util.Timestamp;
+import java.sql.Timestamp;
 
 
 public class AchievementsEarned {

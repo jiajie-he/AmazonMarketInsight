@@ -1,7 +1,5 @@
 package AmazonMarketInsight.model;
 
-import java.util.Timestamp;
-
 
 public class WishList {
 	protected int wishListId;
