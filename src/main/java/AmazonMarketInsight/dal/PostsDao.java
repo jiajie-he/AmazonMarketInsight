@@ -1,6 +1,6 @@
 package AmazonMarketInsight.dal;
 
-import AmazonMarketInsight.model.Posts;
+import AmazonMarketInsight.model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

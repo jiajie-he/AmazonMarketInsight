@@ -18,6 +18,12 @@ public class Users extends Persons{
 		this.subscribed = subscribed;
 	}
 	
+	public Users(String userName, Date doB, Boolean subscribed) {
+		super(userName);
+		this.doB = doB;
+		this.subscribed = subscribed;
+	}
+	
 	public Users(String userName) {
 		super(userName);
 	}

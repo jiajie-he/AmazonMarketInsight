@@ -111,14 +111,14 @@ public class ProductsDao {
         }
     }
 
-    public boolean delete(String productId) throws SQLException {
+    public boolean delete(Products product) throws SQLException {
         String deleteProduct = "DELETE FROM Products WHERE ProductId=?;";
         Connection connection = null;
         PreparedStatement deleteStmt = null;
         try {
             connection = connectionManager.getConnection();
             deleteStmt = connection.prepareStatement(deleteProduct);
-            deleteStmt.setString(1, productId);
+            deleteStmt.setString(1, product.getProductId());
             int affectedRows = deleteStmt.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {

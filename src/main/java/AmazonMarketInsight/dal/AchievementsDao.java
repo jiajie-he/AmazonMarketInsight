@@ -1,14 +1,11 @@
 package AmazonMarketInsight.dal;
 
 import AmazonMarketInsight.model.*;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.sql.Timestamp;
 
 /**
  * Data access object (DAO) class to interact with the underlying Achievements table in your MySQL
@@ -38,17 +35,16 @@ public class AchievementsDao {
 		String insertAchievement = "INSERT INTO Achievements(AchievementId, Created) VALUES(?,?);";
 		Connection connection = null;
 		PreparedStatement insertStmt = null;
-		ResultSet resultKey = null;
 		try {
 			connection = connectionManager.getConnection();
-			insertStmt = connection.prepareStatement(insertAchievement,
-				Statement.RETURN_GENERATED_KEYS);
+			insertStmt = connection.prepareStatement(insertAchievement);
 			// PreparedStatement allows us to substitute specific types into the query template.
 			// For an overview, see:
 			// http://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html.
 			// http://docs.oracle.com/javase/7/docs/api/java/sql/PreparedStatement.html
 			// For nullable fields, you can check the property first and then call setNull()
 			// as applicable.
+			insertStmt.setInt(1, achievement.getAchievementId());
 			insertStmt.setTimestamp(2, achievement.getCreated());
 			// Note that we call executeUpdate(). This is used for a INSERT/UPDATE/DELETE
 			// statements, and it returns an int for the row counts affected (or 0 if the
@@ -56,14 +52,7 @@ public class AchievementsDao {
 			// http://docs.oracle.com/javase/7/docs/api/java/sql/PreparedStatement.html
 			// I'll leave it as an exercise for you to write UPDATE/DELETE methods.
 			insertStmt.executeUpdate();
-			resultKey = insertStmt.getGeneratedKeys();
-			int achievementId = -1;
-			if(resultKey.next()) {
-				achievementId = resultKey.getInt(1);
-			} else {
-				throw new SQLException("Unable to retrieve auto-generated key.");
-			}
-			achievement.setAchievementId(achievementId);
+			
 			// Note 1: if this was an UPDATE statement, then the achievement fields should be
 			// updated before returning to the caller.
 			// Note 2: there are no auto-generated keys, so no update to perform on the
@@ -86,32 +75,27 @@ public class AchievementsDao {
 	 * Update the LastName of the Achievements instance.
 	 * This runs a UPDATE statement.
 	 */
+	/**
+	 * Update the Created timestamp of the Achievements instance.
+	 * This runs an UPDATE statement.
+	 */
 	public Achievements updateCreated(Achievements achievement, Timestamp newCreated) throws SQLException {
-		TimeStamp updateAchievement = "UPDATE Achievements SET Created=? WHERE AchievementId=?;";
-		Connection connection = null;
-		PreparedStatement updateStmt = null;
-		try {
-			connection = connectionManager.getConnection();
-			updateStmt = connection.prepareStatement(updateAchievement);
-			updateStmt.setTimeStamp(1, newCreated);
-			updateStmt.setInt(2, achievement.getAchievementId());
-			updateStmt.executeUpdate();
-			
-			// Update the achievement param before returning to the caller.
-			achievement.setCreated(newCreated);
-			return achievement;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw e;
-		} finally {
-			if(connection != null) {
-				connection.close();
-			}
-			if(updateStmt != null) {
-				updateStmt.close();
-			}
-		}
+	    String updateAchievement = "UPDATE Achievements SET Created=? WHERE AchievementId=?;";
+	    try (Connection connection = connectionManager.getConnection();
+	         PreparedStatement updateStmt = connection.prepareStatement(updateAchievement)) {
+	        updateStmt.setTimestamp(1, newCreated);  // Correct method to set a Timestamp
+	        updateStmt.setInt(2, achievement.getAchievementId());
+	        updateStmt.executeUpdate();
+	        
+	        // Update the 'created' field of the achievement object to reflect the new value.
+	        achievement.setCreated(newCreated);
+	        return achievement;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw e;
+	    }
 	}
+
 
 	/**
 	 * Delete the Achievements instance.
@@ -165,8 +149,8 @@ public class AchievementsDao {
 			// Furthermore, you can retrieve fields by name and by type.
 			if(results.next()) {
 				int resultAchievementId = results.getInt("AchievementId");
-				Timestamp created = results.getTimestamp("Created");
-				Achievements achievement = new Achievements(resultAchievementId, created);
+				Timestamp Created = results.getTimestamp("Created");
+				Achievements achievement = new Achievements(resultAchievementId, Created);
 				return achievement;
 			}
 		} catch (SQLException e) {

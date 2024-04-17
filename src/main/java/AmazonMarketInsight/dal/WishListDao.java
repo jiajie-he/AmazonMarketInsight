@@ -7,9 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -38,8 +36,8 @@ public class WishListDao {
 			connection = connectionManager.getConnection();
 			insertStmt = connection.prepareStatement(insertWishList,
 				Statement.RETURN_GENERATED_KEYS);
-			insertStmt.setString(2, wishList.getUser().getUserName());
-			insertStmt.setInt(3, wishList.getProduct().getProductId());
+			insertStmt.setString(2, wishList.getUserName().getUserName());
+			insertStmt.setString(3, wishList.getProductId().getProductId());
 			insertStmt.executeUpdate();
 			
 			// Retrieve the auto-generated key and set it, so it can be used by the caller.
@@ -123,7 +121,7 @@ public class WishListDao {
 			if(results.next()) {
 				int resultWishListId = results.getInt("WishListId");
 				String userName = results.getString("UserName");
-				int productId = results.getInt("ProductId");
+				String productId = results.getString("ProductId");
 				Users user = usersDao.getUserFromUserName(userName);
 				Products product = productsDao.getProductById(productId);
 				WishList wishList = new WishList(resultWishListId,
@@ -167,7 +165,7 @@ public class WishListDao {
 			ProductsDao productsDao = ProductsDao.getInstance();
 			while(results.next()) {
 				int wishListId = results.getInt("WishListId");
-				int productId = results.getInt("ProductId");
+				String productId = results.getString("ProductId");
 				Products product = productsDao.getProductById(productId);
 				WishList wishList = new WishList(wishListId,
 					user,product);
@@ -205,7 +203,7 @@ public class WishListDao {
 		try {
 			connection = connectionManager.getConnection();
 			selectStmt = connection.prepareStatement(selectProducts);
-			selectStmt.setInt(1, product.getProductId());
+			selectStmt.setString(1, product.getProductId());
 			results = selectStmt.executeQuery();
 			UsersDao usersDao = UsersDao.getInstance();
 			while(results.next()) {

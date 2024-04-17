@@ -38,20 +38,20 @@ public class AchievementsEarnedDao {
 			connection = connectionManager.getConnection();
 			insertStmt = connection.prepareStatement(insertAchievementsEarned,
 				Statement.RETURN_GENERATED_KEYS);
-			insertStmt.setString(2, achievementsEarned.getUser().getUserName());
-			insertStmt.setInt(3, achievementsEarned.getAchievement().getAchievementId());
+			insertStmt.setString(2, achievementsEarned.getUserName().getUserName());
+			insertStmt.setInt(3, achievementsEarned.getAchievementId().getAchievementId());
 			insertStmt.setTimestamp(4, new Timestamp(achievementsEarned.getDateEarned().getTime()));
 			insertStmt.executeUpdate();
 			
 			// Retrieve the auto-generated key and set it, so it can be used by the caller.
 			resultKey = insertStmt.getGeneratedKeys();
-			int achievementEarnedId = -1;
+			int achievementsEarnedId = -1;
 			if(resultKey.next()) {
-				achievementEarnedId = resultKey.getInt(1);
+				achievementsEarnedId = resultKey.getInt(1);
 			} else {
 				throw new SQLException("Unable to retrieve auto-generated key.");
 			}
-			achievementsEarned.setAchievementEarnedId(achievementEarnedId);
+			achievementsEarned.setAchievementsEarnedId(achievementsEarnedId);
 			return achievementsEarned;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -74,15 +74,14 @@ public class AchievementsEarnedDao {
 	 * This runs a UPDATE statement.
 	 */
 	public AchievementsEarned updateDateEarned(AchievementsEarned achievementsEarned, Timestamp newDateEarned) throws SQLException {
-		String updateAchievementsEarned = "UPDATE AchievementsEarned SET DateEarned=? WHERE AchievementEarnedId=?;";
+		String updateAchievementsEarned = "UPDATE AchievementsEarned SET DateEarned=? WHERE AchievementsEarnedId=?;";
 		Connection connection = null;
 		PreparedStatement updateStmt = null;
 		try {
 			connection = connectionManager.getConnection();
-			updateStmt = connection.prepareStatement(updateAchievementsEarned);
-			Date newDateEarnedTimestamp = new Timestamp();
+			//Date newDateEarnedTimestamp = new Timestamp();
 			updateStmt.setInt(1, achievementsEarned.getAchievementsEarnedId());
-			updateStmt.setString(2, achievementsEarned.getUser().getUserName());
+			updateStmt.setString(2, achievementsEarned.getUserName().getUserName());
 			updateStmt.executeUpdate();
 
 			// Update the achievementsEarned param before returning to the caller.
@@ -106,13 +105,13 @@ public class AchievementsEarnedDao {
 	 * This runs a DELETE statement.
 	 */
 	public AchievementsEarned delete(AchievementsEarned achievementsEarned) throws SQLException {
-		String deleteAchievementsEarned = "DELETE FROM AchievementsEarned WHERE AchievementEarnedId=?;";
+		String deleteAchievementsEarned = "DELETE FROM AchievementsEarned WHERE AchievementsEarnedId=?;";
 		Connection connection = null;
 		PreparedStatement deleteStmt = null;
 		try {
 			connection = connectionManager.getConnection();
 			deleteStmt = connection.prepareStatement(deleteAchievementsEarned);
-			deleteStmt.setInt(1, achievementsEarned.getAchievementEarnedId());
+			deleteStmt.setInt(1, achievementsEarned.getAchievementsEarnedId());
 			deleteStmt.executeUpdate();
 
 			// Return null so the caller can no longer operate on the AchievementsEarned instance.
@@ -154,13 +153,13 @@ public class AchievementsEarnedDao {
 			AchievementsDao achievementsDao = AchievementsDao.getInstance();
 			UsersDao usersDao = UsersDao.getInstance();
 			if(results.next()) {
-				int resultAchievementEarnedId = results.getInt("AchievementEarnedId");
+				int resultAchievementsEarnedId = results.getInt("AchievementsEarnedId");
 				String userName = results.getString("UserName");
 				int achievementId = results.getInt("AchievementId");
 				Timestamp dateEarned =  results.getTimestamp("DateEarned");
 				Users user = usersDao.getUserFromUserName(userName);
-				Achievements achievement = achievementsDao.getAchievementById(achievementId);
-				AchievementsEarned achievementsEarned = new AchievementsEarned(resultAchievementEarnedId,
+				Achievements achievement = achievementsDao.getAchievementFromAchievementId(achievementId);
+				AchievementsEarned achievementsEarned = new AchievementsEarned(resultAchievementsEarnedId,
 					user,achievement,dateEarned);
 				return achievementsEarned;
 			}
@@ -184,10 +183,10 @@ public class AchievementsEarnedDao {
 	/**
 	 * Get the all the AchievementsEarned for a user.
 	 */
-	public List<AchievementsEarned> getAchievementsEarnedFromUserName(Users user) throws SQLException {
+	public List<AchievementsEarned> getAchievementsEarnedForUserName(Users user) throws SQLException {
 		List<AchievementsEarned> achievementsEarnedList = new ArrayList<AchievementsEarned>();
 		String selectAchievementsEarned =
-			"SELECT AchievementEarnedId,UserName,AchievementId,DateEarned " +
+			"SELECT AchievementsEarnedId,UserName,AchievementId,DateEarned " +
 			"FROM AchievementsEarned " +
 			"WHERE UserName=?;";
 		Connection connection = null;
@@ -200,11 +199,11 @@ public class AchievementsEarnedDao {
 			results = selectStmt.executeQuery();
 			AchievementsDao achievementsDao = AchievementsDao.getInstance();
 			while(results.next()) {
-				int achievementEarnedId = results.getInt("AchievementEarnedId");
+				int achievementsEarnedId = results.getInt("AchievementsEarnedId");
 				int achievementId = results.getInt("AchievementId");
 				Timestamp dateEarned =  results.getTimestamp("DateEarned");
-				Achievements achievement = achievementsDao.getAchievementById(achievementId);
-				AchievementsEarned achievementsEarned = new AchievementsEarned(achievementEarnedId,
+				Achievements achievement = achievementsDao.getAchievementFromAchievementId(achievementId);
+				AchievementsEarned achievementsEarned = new AchievementsEarned(achievementsEarnedId,
 					user,achievement, dateEarned);
 				achievementsEarnedList.add(achievementsEarned);
 			}
@@ -228,44 +227,33 @@ public class AchievementsEarnedDao {
 	/**
 	 * Get the all the AchievementsEarned for a post.
 	 */
-	public List<AchievementsEarned> getAchievementsEarnedFromAchievement(Achievements achievement) throws SQLException {
-		List<AchievementsEarned> achievementsEarnedList = new ArrayList<AchievementsEarned>();
-		String selectAchievements =
-			"SELECT AchievementEarnedId,UserName,AchievementId,DateEarned " +
-			"FROM AchievementsEarned " +
-			"WHERE AchievementId=?;";
-		Connection connection = null;
-		PreparedStatement selectStmt = null;
-		ResultSet results = null;
-		try {
-			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectAchievements);
-			selectStmt.setInt(1, achievement.getAchievementId());
-			results = selectStmt.executeQuery();
-			UsersDao usersDao = UsersDao.getInstance();
-			while(results.next()) {
-				int achievementEarnedId = results.getInt("AchievementEarnedId");
-				String userName = results.getString("UserName");
-				Timestamp dateEarned =  results.getTimestamp("DateEarned");
+	public List<AchievementsEarned> getAchievementsEarnedForAchievement(Achievements achievement) throws SQLException {
+	    List<AchievementsEarned> achievementsEarnedList = new ArrayList<>();
+	    String selectAchievements =
+	        "SELECT AchievementsEarnedId, UserName, DateEarned " +
+	        "FROM AchievementsEarned " +
+	        "WHERE AchievementId=?;";
+	    try (Connection connection = connectionManager.getConnection();
+	         PreparedStatement selectStmt = connection.prepareStatement(selectAchievements)) {
+	        selectStmt.setInt(1, achievement.getAchievementId());
+	        try (ResultSet results = selectStmt.executeQuery()) {
+	            UsersDao usersDao = UsersDao.getInstance();
+	            while (results.next()) {
+	                int achievementsEarnedId = results.getInt("AchievementsEarnedId");
+	                String userName = results.getString("UserName");
+	                Timestamp dateEarned = results.getTimestamp("DateEarned");
 
-				Users user = usersDao.getUserFromUserName(userName);
-				AchievementsEarned achievementsEarned = new AchievementsEarned(achievementEarnedId, user, achievement, dateEarned);
-				achievementsEarnedList.add(achievementsEarned);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw e;
-		} finally {
-			if(connection != null) {
-				connection.close();
-			}
-			if(selectStmt != null) {
-				selectStmt.close();
-			}
-			if(results != null) {
-				results.close();
-			}
-		}
-		return achievementsEarnedList;
+	                Users user = usersDao.getUserFromUserName(userName); // Fetch user object using the username
+	                if (user != null) { // Check if user exists to avoid adding null to the list
+	                    AchievementsEarned achievementsEarned = new AchievementsEarned(achievementsEarnedId, user, achievement, dateEarned);
+	                    achievementsEarnedList.add(achievementsEarned);
+	                }
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace(); // Consider using logging here instead
+	        throw e;
+	    }
+	    return achievementsEarnedList;
 	}
 }

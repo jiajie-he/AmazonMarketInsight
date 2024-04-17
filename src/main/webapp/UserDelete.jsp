@@ -12,7 +12,7 @@
 </head>
 <body>
 	<h1>${messages.title}</h1>
-	<form action="userdelete" method="post">
+	<form action="delete" method="post">
 		<p>
 			<div <c:if test="${messages.disableSubmit}">style="display:none"</c:if>>
 				<label for="username">UserName</label>

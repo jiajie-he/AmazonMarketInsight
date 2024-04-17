@@ -1,7 +1,7 @@
 package AmazonMarketInsight.model;
 
 import java.sql.Timestamp;
-import java.util.Locale.Category;
+// import java.util.Locale.Category;
 
 public class UserGroups {
     private int groupId;
@@ -10,7 +10,28 @@ public class UserGroups {
     private java.sql.Timestamp joinDate;
     private String userName;
     private Category category;
-
+    public enum Category {
+        OWNER(0), ADMIN(1), MEMBER(2);
+    
+        private final int id;
+    
+        Category(int id) {
+            this.id = id;
+        }
+    
+        public int getId() {
+            return this.id;
+        }
+    
+        public static Category fromId(int id) {
+            for (Category cat : values()) {
+                if (cat.getId() == id) {
+                    return cat;
+                }
+            }
+            throw new IllegalArgumentException("No category with id: " + id);
+        }
+    }
     // Constructors, getters, setters
    
 

@@ -57,5 +57,10 @@ public class AchievementsEarned {
 	public void setDateEarned(Timestamp dateEarned) {
 		this.dateEarned = dateEarned;
 	}
+
 	
-}
+
+
+	}
+	
+

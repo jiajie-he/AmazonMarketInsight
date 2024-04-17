@@ -1,6 +1,6 @@
-package amazon.dal;
+package AmazonMarketInsight.dal;
 
-import amazon.model.PostComments;
+import AmazonMarketInsight.model.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +26,8 @@ public class PostCommentsDao {
     public PostComments create(PostComments postComment) throws SQLException {
         String insertComment = "INSERT INTO PostComments(Created, Comment, UpVotes, DownVotes, PostId, UserName) VALUES(?,?,?,?,?,?);";
         try (Connection connection = connectionManager.getConnection();
-             PreparedStatement insertStmt = connection.prepareStatement(insertComment, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement insertStmt = connection.prepareStatement(insertComment,
+                        PreparedStatement.RETURN_GENERATED_KEYS)) {
             insertStmt.setDate(1, postComment.getCreated());
             insertStmt.setString(2, postComment.getComment());
             insertStmt.setInt(3, postComment.getUpVotes());
@@ -46,32 +47,77 @@ public class PostCommentsDao {
         return postComment;
     }
 
+    public PostComments getPostCommentById(int postCommentId) throws SQLException {
+        String selectComment = "SELECT * FROM PostComments WHERE PostCommentId=?;";
+        try (Connection connection = connectionManager.getConnection();
+                PreparedStatement selectStmt = connection.prepareStatement(selectComment)) {
+            selectStmt.setInt(1, postCommentId);
+            try (ResultSet results = selectStmt.executeQuery()) {
+                if (results.next()) {
+                    return new PostComments(
+                            results.getDate("Created"),
+                            results.getString("Comment"),
+                            results.getInt("UpVotes"),
+                            results.getInt("DownVotes"),
+                            results.getInt("PostId"),
+                            results.getString("UserName"));
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<PostComments> getPostCommentsByPostId(int postId) throws SQLException {
+        List<PostComments> comments = new ArrayList<>();
+        String selectComments = "SELECT * FROM PostComments WHERE PostId=?;";
+        try (Connection connection = connectionManager.getConnection();
+                PreparedStatement selectStmt = connection.prepareStatement(selectComments)) {
+            selectStmt.setInt(1, postId);
+            try (ResultSet results = selectStmt.executeQuery()) {
+                while (results.next()) {
+                    comments.add(new PostComments(
+                            results.getDate("Created"),
+                            results.getString("Comment"),
+                            results.getInt("UpVotes"),
+                            results.getInt("DownVotes"),
+                            results.getInt("PostId"),
+                            results.getString("UserName")));
+                }
+            }
+        }
+        return comments;
+    }
+
     public PostComments updateUpVotes(int postCommentId, int newUpVotes) throws SQLException {
         String updateComment = "UPDATE PostComments SET UpVotes=? WHERE PostCommentId=?;";
-        PostComments postComment = null;
         try (Connection connection = connectionManager.getConnection();
-             PreparedStatement updateStmt = connection.prepareStatement(updateComment)) {
+                PreparedStatement updateStmt = connection.prepareStatement(updateComment)) {
             updateStmt.setInt(1, newUpVotes);
             updateStmt.setInt(2, postCommentId);
             updateStmt.executeUpdate();
-            
-            postComment = getPostCommentById(postCommentId);
+
+            return getPostCommentById(postCommentId);
         }
-        return postComment;
     }
 
     public PostComments updateDownVotes(int postCommentId, int newDownVotes) throws SQLException {
         String updateComment = "UPDATE PostComments SET DownVotes=? WHERE PostCommentId=?;";
-        PostComments postComment = null;
         try (Connection connection = connectionManager.getConnection();
-             PreparedStatement updateStmt = connection.prepareStatement(updateComment)) {
+                PreparedStatement updateStmt = connection.prepareStatement(updateComment)) {
             updateStmt.setInt(1, newDownVotes);
             updateStmt.setInt(2, postCommentId);
             updateStmt.executeUpdate();
-            
-            postComment = getPostCommentById(postCommentId);
+
+            return getPostCommentById(postCommentId);
         }
-        return postComment;
     }
 
+    public void delete(PostComments postComment) throws SQLException {
+        String deleteComment = "DELETE FROM PostComments WHERE PostCommentId=?;";
+        try (Connection connection = connectionManager.getConnection();
+                PreparedStatement deleteStmt = connection.prepareStatement(deleteComment)) {
+            deleteStmt.setInt(1, postComment.getPostCommentId());
+            deleteStmt.executeUpdate();
+        }
+    }
 }
