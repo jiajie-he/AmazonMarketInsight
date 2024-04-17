@@ -25,7 +25,7 @@ public class UserGroupsDAO {
             statement.setString(2, userGroups.getRole());
             statement.setTimestamp(3, userGroups.getJoinDate());
             statement.setString(4, userGroups.getUserName());
-            statement.setInt(5, userGroups.getCategory().getCategoryId());
+            statement.setInt(5, userGroups.getCategory().getId());
 
             int rowsInserted = statement.executeUpdate();
             if (rowsInserted > 0) {
@@ -58,11 +58,11 @@ public class UserGroupsDAO {
                     userGroups.setJoinDate(resultSet.getTimestamp("JoinDate"));
                     userGroups.setUserName(resultSet.getString("UserName"));
 
-                    Category category = new Category();
-                    category.setCategoryId(resultSet.getInt("CategoryId"));
-                    category.setName(resultSet.getString("Name"));
-
-                    userGroups.setCategory(category);
+                    // Category category = new Category();
+                    // category.setCategoryId(resultSet.getInt("CategoryId"));
+                    // category.setName(resultSet.getString("Name"));
+                    int categoryId = resultSet.getInt("CategoryId");
+                    userGroups.setCategory(UserGroups.Category.fromId(categoryId));
                     userGroupsList.add(userGroups);
                 }
             }

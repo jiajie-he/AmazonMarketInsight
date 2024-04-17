@@ -12,14 +12,14 @@
 </head>
 <body>
 	<h1>Update User</h1>
-	<form action="userupdate" method="post">
+	<form action="update" method="post">
 		<p>
 			<label for="username">UserName</label>
 			<input id="username" name="username" value="${fn:escapeXml(param.username)}">
 		</p>
 		<p>
-			<label for="subscribed">New Subscribe Status</label>
-			<input id="subscribed" name="subscribed" value="">
+			<label for="lastname">New Last Name</label>
+			<input id="lastname" name="lastname" value="">
 		</p>
 		<p>
 			<input type="submit">

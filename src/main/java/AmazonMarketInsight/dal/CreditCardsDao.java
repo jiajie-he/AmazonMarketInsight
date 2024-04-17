@@ -2,6 +2,7 @@ package AmazonMarketInsight.dal;
 
 import AmazonMarketInsight.model.*;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,23 +18,26 @@ import java.util.List;
  * MySQL instance. This is used to store {@link CreditCards} into your MySQL instance and 
  * retrieve {@link CreditCards} from MySQL instance.
  */
-public class CreditCardsDao{
-	// Single pattern: instantiation is limited to one object.
-	private static CreditCardsDao instance = null;
-	protected CreditCardsDao() {
-		super();
-	}
-	public static CreditCardsDao getInstance() {
-		if(instance == null) {
-			instance = new CreditCardsDao();
-		}
-		return instance;
-	}
+
+public class CreditCardsDao {
+    private static CreditCardsDao instance = null;
+    protected ConnectionManager connectionManager;
+
+    protected CreditCardsDao() {
+        connectionManager = new ConnectionManager();
+    }
+
+    public static CreditCardsDao getInstance() {
+        if (instance == null) {
+            instance = new CreditCardsDao();
+        }
+        return instance;
+    }
 	
 	public CreditCards create(CreditCards creditCard) throws SQLException {
 		// Insert into the superclass table first.
 		create(new CreditCards(creditCard.getCardNumber(), creditCard.getExpiration(),
-		  	creditCard.getUserName()));
+			creditCard.getUserName()));
 
 		String insertCreditCard = "INSERT INTO CreditCards(CardNumber, Expiration, UserName) VALUES(?,?,?);";
 		Connection connection = null;
@@ -41,9 +45,9 @@ public class CreditCardsDao{
 		try {
 			connection = connectionManager.getConnection();
 			insertStmt = connection.prepareStatement(insertCreditCard);
-			insertStmt.setBigInt(1, creditCard.getCardNumber());
+			insertStmt.setLong(1, creditCard.getCardNumber().longValue());
 			insertStmt.setTimestamp(2, new Timestamp(creditCard.getExpiration().getTime()));
-			insertStmt.setString(3, creditCard.getUserName());
+			insertStmt.setString(3, creditCard.getUserName().getUserName());
 			insertStmt.executeUpdate();
 			return creditCard;
 		} catch (SQLException e) {
@@ -64,19 +68,19 @@ public class CreditCardsDao{
 	 * This runs a UPDATE statement.
 	 */
 	public CreditCards updateExpiration(CreditCards creditCard, Date newExpiration) throws SQLException {
-		String updateCreditCard = "UPDATE CreditCards SET Expiration=? WHERE CardNumber=?;";
+		String updateuser = "UPDATE CreditCards SET Expiration=? WHERE Expiration=?;";
 		Connection connection = null;
 		PreparedStatement updateStmt = null;
 		try {
 			connection = connectionManager.getConnection();
-			updateStmt = connection.prepareStatement(updateCreditCard);
-			updateStmt.setString(1, newExpiration);
-			updateStmt.setString(2, creditCards.getCreditCardNumber());
+			updateStmt = connection.prepareStatement(updateuser);
+			updateStmt.setTimestamp(1, new Timestamp(newExpiration.getTime())); 
+			updateStmt.setLong(2, creditCard.getCardNumber().longValue());
 			updateStmt.executeUpdate();
 			
 			// Update the user param before returning to the caller.
-			creditCards.setExpiration(newExpiration);
-			return user;
+			creditCard.setExpiration(newExpiration);
+			return creditCard;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
@@ -101,13 +105,13 @@ public class CreditCardsDao{
 		try {
 			connection = connectionManager.getConnection();
 			deleteStmt = connection.prepareStatement(deleteCreditCard);
-			deleteStmt.setString(1, creditCard.getCardNumber());
+			deleteStmt.setLong(1, creditCard.getCardNumber().longValue());
 			deleteStmt.executeUpdate();
 
 			// Then also delete from the superclass.
 			// Note: due to the fk constraint (ON DELETE CASCADE), we could simply call
 			// super.delete() without even needing to delete from CreditCards first.
-			super.delete(creditCard);
+			//super.delete(creditCard);
 
 			return null;
 		} catch (SQLException e) {
@@ -123,79 +127,74 @@ public class CreditCardsDao{
 		}
 	}
 	
-	public CreditCards getCreditCardByCardNumber(BigInt CardNumber) throws SQLException {
-		String selectCreditCard =
-			"SELECT CreditCards.CardNumber AS CardNumber, Expiration, UserName " +
-			"FROM CreditCards " +
-			"WHERE CreditCards.CardNumber=?;";
-		Connection connection = null;
-		PreparedStatement selectStmt = null;
-		ResultSet results = null;
-		try {
-			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectCreditCard);
-			selectStmt.setBigInt(1, CardNumber);
-			results = selectStmt.executeQuery();
-			if(results.next()) {
-				BigInt resultCardNumber = results.getBigInt("CardNumber");
-				Date expiration = results.getDate("Expiration");
-				String userName = results.getString("UserName");
-				CreditCards creditCard = new CreditCards(resultCardNumber, expiration, userName);
-				return creditCard;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw e;
-		} finally {
-			if(connection != null) {
-				connection.close();
-			}
-			if(selectStmt != null) {
-				selectStmt.close();
-			}
-			if(results != null) {
-				results.close();
-			}
-		}
-		return null;
+	public CreditCards getCreditCardByCardNumber(BigInteger cardNumber) throws SQLException {
+	    String selectCreditCard = "SELECT CardNumber, Expiration, UserName FROM CreditCards WHERE CardNumber=?;";
+	    try (Connection connection = connectionManager.getConnection();
+	         PreparedStatement selectStmt = connection.prepareStatement(selectCreditCard)) {
+	        selectStmt.setLong(1, cardNumber.longValue()); // Assuming that CardNumber can fit into a long
+	        try (ResultSet results = selectStmt.executeQuery()) {
+	            if (results.next()) {
+	                BigInteger resultCardNumber = BigInteger.valueOf(results.getLong("CardNumber"));
+	                Timestamp expirationTimestamp = results.getTimestamp("Expiration");
+	                Date expirationDate = new Date(expirationTimestamp.getTime());
+	                String userName = results.getString("UserName");
+	               
+	                UsersDao usersDao = UsersDao.getInstance();
+	                Users user = usersDao.getUserFromUserName(userName); 
+	                
+	                CreditCards creditCard = new CreditCards(resultCardNumber, expirationDate, user);
+	                return creditCard;
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();  // Consider logging this exception instead
+	        throw e;
+	    }
+	    return null;
 	}
 
-	public List<CreditCards> getCreditCardsByUserName(String userName)
-			throws SQLException {
-		List<CreditCards> creditCardsList = new ArrayList<CreditCards>();
-		String selectCreditCards =
-			"SELECT CreditCards.CardNumber AS CardNumber, Expiration, UserName" +
-			"FROM CreditCards"
-			"WHERE UserName=?;";
-		Connection connection = null;
-		PreparedStatement selectStmt = null;
-		ResultSet results = null;
-		try {
-			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectCreditCards);
-			selectStmt.setString(1, UserName);
-			results = selectStmt.executeQuery();
-			while(results.next()) {
-				BigInt CardNumber = results.getBigInt("CardNumber");
-				Date Expiration = results.getDate("Expiration");
-				String resultUserName = results.getString("UserName");
-				CreditCards creditCard = new CreditCards(CardNumber, Expiration, resultUserName);
-				creditCardsList.add(creditCard);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw e;
-		} finally {
-			if(connection != null) {
-				connection.close();
-			}
-			if(selectStmt != null) {
-				selectStmt.close();
-			}
-			if(results != null) {
-				results.close();
-			}
-		}
-		return creditCardsList;
+	
+
+	public List<CreditCards> getCreditCardsByUserName(String userName) throws SQLException {
+	    List<CreditCards> creditCards = new ArrayList<>();
+	    String selectCreditCards = "SELECT CardNumber, Expiration, UserName FROM CreditCards WHERE UserName=?;";
+	    Connection connection = null;
+	    PreparedStatement selectStmt = null;
+	    ResultSet results = null;
+	    try {
+	        connection = connectionManager.getConnection();
+	        selectStmt = connection.prepareStatement(selectCreditCards);
+	        selectStmt.setString(1, userName);
+	        results = selectStmt.executeQuery();
+	        while (results.next()) {
+	            String cardNumberStr = results.getString("CardNumber");
+	            BigInteger cardNumber = new BigInteger(cardNumberStr);  // Convert string to BigInteger
+	            Date expiration = new Date(results.getTimestamp("Expiration").getTime());  // Assuming 'Expiration' is stored as a Timestamp
+	            String resultUserName = results.getString("UserName");
+
+	            UsersDao usersDao = UsersDao.getInstance();
+	            Users user = usersDao.getUserFromUserName(resultUserName);  // Assuming you want to attach the Users object
+
+	            if (user != null) {
+	                CreditCards creditCard = new CreditCards(cardNumber, expiration, user);
+	                creditCards.add(creditCard);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace(); // Better to use a logger
+	        throw e;
+	    } finally {
+	        if (results != null) {
+	            results.close();
+	        }
+	        if (selectStmt != null) {
+	            selectStmt.close();
+	        }
+	        if (connection != null) {
+	            connection.close();
+	        }
+	    }
+	    return creditCards;
 	}
+
 }

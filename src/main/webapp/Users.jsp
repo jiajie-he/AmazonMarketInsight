@@ -24,13 +24,11 @@
                     <td><fmt:formatDate value="${user.getDoB()}" pattern="MM-dd-yyyy"/></td>
                     <td><c:out value="${user.getSubscribed()}" /></td>
                     <td><a href="creditcard?username=<c:out value="${user.getUserName()}"/>">CreditCards</a></td>
-                    <td><a href="deleteuser?username=<c:out value="${user.getUserName()}"/>">Delete</a></td>
+                    <td><a href="delete?username=<c:out value="${user.getUserName()}"/>">Delete</a></td>
                     <td><a href="achievementsearned?username=<c:out value="${user.getUserName()}"/>">AchievementsEarned</a></td>
                     <td><a href="deleteuser?username=<c:out value="${user.getUserName()}"/>">Delete</a></td>
-                    <td><a href="wishlist?username=<c:out value="${user.getUserName()}"/>">WishLists</a></td>
-                    <td><a href="deleteuser?username=<c:out value="${user.getUserName()}"/>">Delete</a></td>
+                    <td><a href="wishlist?username=<c:out value="${user.getUserName()}"/>">WishLists</a></td>     
                     <td><a href="usergroup?username=<c:out value="${user.getUserName()}"/>">UserGroups</a></td>
-                    <td><a href="deleteuser?username=<c:out value="${user.getUserName()}"/>">Delete</a></td>
                     <td><a href="post?username=<c:out value="${user.getUserName()}"/>">Posts</a></td>
                     <td><a href="postcomment?username=<c:out value="${user.getUserName()}"/>">PostComments</a></td>
                 </tr>

@@ -26,7 +26,8 @@ public class UsersDao extends PersonsDao {
 
 	public Users create(Users users) throws SQLException {
 		// Insert into the superclass table first.
-		create(new Persons(users.getUserName()));
+		create(new Persons(users.getUserName(), users.getPassword(), users.getFirstName(),
+				users.getLastName(), users.getEmail(), users.getPhoneNumber()));
 
 		String insertUser = "INSERT INTO Users(UserName,DoB,Subscribed) VALUES(?,?,?);";
 		Connection connection = null;
@@ -197,4 +198,74 @@ public class UsersDao extends PersonsDao {
 		}
 		return users;
 	}
+	
+	public List<Users> getAllUsers() throws SQLException {
+        List<Users> users = new ArrayList<>();
+        String selectUsers = "SELECT * FROM Users;";
+        Connection connection = null;
+        PreparedStatement selectStmt = null;
+        ResultSet results = null;
+        try {
+            connection = connectionManager.getConnection();
+            selectStmt = connection.prepareStatement(selectUsers);
+            results = selectStmt.executeQuery();
+            while (results.next()) {
+                // int userId = results.getInt("UserId");
+                String userName = results.getString("UserName");
+//                String password = results.getString("Password");
+//                String firstName = results.getString("FirstName");
+//                String lastName = results.getString("LastName");
+//                String email = results.getString("Email");
+//                String phoneNumber = results.getString("PhoneNumber");
+                Date doB = new Date(results.getDate("DoB").getTime());
+				Boolean subscribed = results.getBoolean("Subscribed");
+                Users user = new Users(userName, doB, subscribed);
+                users.add(user);
+            }
+        } finally {
+            if (results != null) {
+                results.close();
+            }
+            if (selectStmt != null) {
+                selectStmt.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return users;
+    }
+	
+	public Users loginUser(String username, String password) throws SQLException {
+	    Users user = null;
+	    String sql = "SELECT Users.UserName AS UserName, Persons.Password AS Password, " +
+	                 "FirstName, LastName, Email, PhoneNumber, DoB, Subscribed " +
+	                 "FROM Users INNER JOIN Persons ON Users.UserName = Persons.UserName " +
+	                 "WHERE Users.UserName = ? AND Persons.Password = ?;";
+	    try (Connection conn = connectionManager.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setString(1, username);
+	        stmt.setString(2, password);
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            if (rs.next()) {
+	                // Assume constructor Users(username, password, firstName, lastName, email, phoneNumber, dob, subscribed)
+	                // Adjust as per your actual constructor
+	                user = new Users(
+	                    rs.getString("UserName"), // Or just use username
+	                    rs.getString("Password"), // Or just use password
+	                    rs.getString("FirstName"),
+	                    rs.getString("LastName"),
+	                    rs.getString("Email"),
+	                    rs.getString("PhoneNumber"),
+	                    rs.getDate("DoB"),
+	                    rs.getBoolean("Subscribed")
+	                );
+	            }
+	        }
+	    }
+	    return user;
+	}
+
+
 }
